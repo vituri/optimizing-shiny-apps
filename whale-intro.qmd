@@ -1,0 +1,88 @@
+---
+title: "The CRAN whales app"
+---
+
+```{r, include=FALSE}
+eval_things <- FALSE
+```
+
+This guide is a modern reading of the classic `promises` [Case study: converting a Shiny app to async
+](https://rstudio.github.io/promises/articles/promises_08_casestudy.html) mixed with `shinyloadtest` [Case study: Scaling an app
+](https://rstudio.github.io/shinyloadtest/articles/case-study-scaling.html).
+
+Starting with an innocent shiny app, we will do many steps to make it more performant and analyze how many people can use it at the same time, [creating reports](https://rstudio.github.io/shinyloadtest/articles/analyzing-load-test-logs.html) with `shinyloadtest` and `shinycannon`. The roadmap is the following:
+
+- App 1: the first version of the [cranwhales app](https://rstudio.github.io/promises/articles/promises_08_casestudy.html)^[see online version [here](https://gallery.shinyapps.io/cranwhales/) or code [here](https://github.com/rstudio/cranwhales)]. We will modify some things to make it more modern (for example, use `bslib`).
+- App 2: modify App 1 to introduce cache and memoise; use faster functions where possible.
+- App 3: modify App 2 to introduce async via the [new ExtendedTask](https://rstudio.github.io/shiny/reference/ExtendedTask.html).
+- App 4-R: modify App 3 to use an external [plumber API](https://www.rplumber.io/).
+- App 4-Julia: modify App 3 to use an external API made in [Julia](https://julialang.org/) with [Oxygen.jl](https://oxygenframework.github.io/Oxygen.jl/stable/). Julia is known for being a high-performance language, so let's give it a try here.
+- App 4-Python: modify App 3 to use an external API made in fastapi?
+
+The repo is structured as a R package to make it easy to track dependencies, load functions and share them between the apps.
+
+
+
+## A tour by CRAN whales
+
+You can see it [online](https://gallery.shinyapps.io/cranwhales/) or follow me in this guided tour.
+
+The app intention is to show the *whales*: certain IPs that download *a lot* of data from CRAN. Let me describe its features.
+
+### Widgets
+
+The app has two widgets in a sidebar: 
+- a date selector, stored in `input$date`: the day of the downloads.
+- a numeric input with the amount of *whales* (that is: the top N downloaders); stored in `input$n_whales`. It goes from 1 to 25.
+
+There is no button.
+
+![](images/app-filter.png)
+
+### The data
+
+For each selected date, the app should download the zipped file from [http://cran-logs.rstudio.com/](http://cran-logs.rstudio.com/) and read it. 
+
+We will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server. 
+
+Each zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:
+
+```{r, include=FALSE, eval=eval_things}
+# devtools::load_all()
+```
+
+
+```{r, eval=eval_things}
+# df = download_and_read()
+# glimpse(df, n = 10)
+```
+
+## The app
+
+### Tab 1: All traffic
+
+This tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs. non-whales. You can see the impact of 6 users compared to the total ~58k users.
+
+![](images/app-all_traffic.png)
+
+We need to calculate the top N whales^[N = `input$n_whales`] and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs. non-whale.
+
+### Tab 2: Biggest whales
+
+Here we compare the amount of downloads between the whales in a single day.
+
+![](images/app-biggest-whales.png)
+
+### Tab 3: Whales by hour
+
+For each whale in a facet, count the downloads by hour.
+
+![](images/app-whales-by-hour.png)
+
+### Tab 4: Detail view
+
+In the detail view, we can see which package was downloaded in a timeline by selecting a whale.
+
+![A whale that downloaded many packages all the time](images/app-detail-view1.png)
+
+![A whale that downloaded one package at a time, in a organized manner](images/app-detail-view2.png)

@@ -1,0 +1,384 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Optimizing Shiny apps",
+    "section": "",
+    "text": "Preface\nThis book is for those who made a nice shiny app and want to share it with the maximum amount of people possible. We aim to answer the following:\n\nGiven a fixed amount of hardware serving the shiny app (say, 2 cores) and a fixed amount of hardware serving an optional API backend (say, 4 cores), how many people can access a shiny app and have a good experience? Can we make it to a thousand?\n\nCreating a shiny app is easy, but serving it to dozens of people and making them all have a good experience… this is a challenge.\nIn this book, we will show in practice how many techniques can be used to improve performance.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "intro.html",
+    "href": "intro.html",
+    "title": "\n1  Introduction\n",
+    "section": "",
+    "text": "This is a book created from markdown and executable code.\nSee Knuth (1984) for additional discussion of literate programming.\n\n1 + 1\n\n[1] 2\n\n\n\n\n\n\nKnuth, Donald E. 1984. “Literate Programming.” Comput. J. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html",
+    "href": "summary.html",
+    "title": "\n8  Summary\n",
+    "section": "",
+    "text": "In summary, this book has no content whatsoever.\n\n1 + 1\n\n[1] 2",
+    "crumbs": [
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "References",
+    "section": "",
+    "text": "Knuth, Donald E. 1984. “Literate Programming.” Comput.\nJ. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "References"
+    ]
+  },
+  {
+    "objectID": "index.html#widgets",
+    "href": "index.html#widgets",
+    "title": "The limits of Shiny",
+    "section": "\n4.1 Widgets",
+    "text": "4.1 Widgets\nThe app has two widgets in a sidebar: - a date selector, stored in input$date: the day of the downloads. - a numeric input with the amount of whales (that is: the top N downloaders); stored in input$n_whales. It goes from 1 to 25.\nThere is no button.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#the-data",
+    "href": "index.html#the-data",
+    "title": "The limits of Shiny",
+    "section": "\n4.2 The data",
+    "text": "4.2 The data\nFor each selected date, the app should download the zipped file from http://cran-logs.rstudio.com/ and read it.\nWe will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server.\nEach zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:\n\n# df = download_and_read()\n# glimpse(df, n = 10)",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#tab-1-all-traffic",
+    "href": "index.html#tab-1-all-traffic",
+    "title": "The limits of Shiny",
+    "section": "\n4.3 Tab 1: All traffic",
+    "text": "4.3 Tab 1: All traffic\nThis tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs. non-whales. You can see the impact of 6 users compared to the total ~58k users.\n\nWe need to calculate the top N whales2 and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs. non-whale.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#tab-2-biggest-whales",
+    "href": "index.html#tab-2-biggest-whales",
+    "title": "The limits of Shiny",
+    "section": "\n4.4 Tab 2: Biggest whales",
+    "text": "4.4 Tab 2: Biggest whales\nHere we compare the amount of downloads between the whales in a single day.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#tab-3-whales-by-hour",
+    "href": "index.html#tab-3-whales-by-hour",
+    "title": "The limits of Shiny",
+    "section": "\n4.5 Tab 3: Whales by hour",
+    "text": "4.5 Tab 3: Whales by hour\nFor each whale in a facet, count the downloads by hour.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#tab-4-detail-view",
+    "href": "index.html#tab-4-detail-view",
+    "title": "The limits of Shiny",
+    "section": "\n4.6 Tab 4: Detail view",
+    "text": "4.6 Tab 4: Detail view\nIn the detail view, we can see which package was downloaded in a timeline by selecting a whale.\n\n\nA whale that downloaded many packages all the time\n\n\n\nA whale that downloaded one package at a time, in a organized manner",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#code",
+    "href": "index.html#code",
+    "title": "The limits of Shiny",
+    "section": "\n5.1 Code",
+    "text": "5.1 Code\nHere I show a bit of code; this session can be skipped, but some details about the server will be needed later.\n\n5.1.1 UI\nThe UI simply call the modules\n\nui1 &lt;- function() {\n  ui &lt;- page_navbar(\n    title = \"CRAM whales 2.0\",\n    theme = my_bs_theme(),\n    sidebar = sidebar(\n      dateInput(inputId = \"date\", label = \"Date\", value = app_start_date(), max = app_start_date()),\n      numericInput(inputId = \"n_whales\", label = \"Show top N downloaders:\", 6, min = 1, max = 25, step = 1)\n    ),\n    nav_panel(title = \"All traffic\", md1.all_traffic_UI()),\n    nav_panel(title = \"Biggest whales\", md1.biggest_whales_UI()),\n    nav_panel(title = \"Whales by hour\", md1.whales_by_hour_UI()),\n    nav_panel(title = \"Detail view\", md1.detail_view_UI())\n  )\n\n  ui\n}\n\n\n5.1.2 Server\nIn the server I tried to calculate all necessary reactives to pass to modules; reactives have a rc. to be easy to remember which objects are reactive and which are not.\n\nCodeserver1 &lt;- function(input, output, session) {\n  # rc.data: read data ------------------------------------------------------\n  rc.data &lt;- reactive({\n    download_and_read(input$date)\n  }) |&gt;\n    bindEvent(input$date)\n\n\n  # Tab 1: All traffic ------------------------------------------------------\n  # rc.count: simple counting -----------------------------------------------\n  rc.count &lt;- reactive({\n    calc_count_downloads(rc.data())\n  })\n\n  # rc.whales: separate the whales ------------------------------------------\n  rc.whales &lt;- reactive({\n    create_ip_names(rc.count(), input$n_whales)\n  }) |&gt;\n    bindEvent(input$n_whales, rc.count())\n\n  rc.whales_vs_non_whales_by_hour &lt;- reactive({\n    calc_whales_vs_non_whales_by_hour(df = rc.data(), whale_ip = rc.whales()$ip_id)\n  })\n\n  # rc.valueboxes ------------------------------------------------------------\n  rc.valuebox1 &lt;- reactive({\n    calc_valuebox_size(rc.data())\n  })\n\n  rc.valuebox2 &lt;- reactive({\n    calc_valuebox_rows(rc.data())\n  })\n\n  rc.valuebox3 &lt;- reactive({\n    calc_valuebox_unique_ids(rc.data())\n  })\n\n  # Tab 2: Biggest whales ---------------------------------------------------\n  # reuse rc.whales\n\n\n  # Tab 3: Whales by hour ---------------------------------------------------\n  # rc.downloads_by_hour_with_names -----------------------------------------\n  rc.downloads_by_hour_with_names &lt;- reactive({\n    calc_whales_by_hour(rc.data(), rc.whales())\n  })\n\n\n  # Tab 4: Detail view ------------------------------------------------------\n  # uses rc.data and rc.whales\n\n  # modules -----------------------------------------------------------------\n  md1.all_traffic_server(\n    rc.valuebox1 = rc.valuebox1, rc.valuebox2 = rc.valuebox2, rc.valuebox3 = rc.valuebox3,\n    rc.whales_vs_non_whales_by_hour = rc.whales_vs_non_whales_by_hour\n  )\n\n  md1.biggest_whales_server(rc.biggest_whales = rc.whales)\n  md1.whales_by_hour_server(rc.downloads_by_hour_with_names = rc.downloads_by_hour_with_names)\n  md1.detail_view_server(rc.data = rc.data, rc.whales = rc.whales)\n}\n\n\n\n5.1.3 Data\nThe r/data.R file has all the functions necessary to read files and do the calculations.\n\nCode# read data ---------------------------------------------------------------\ncreate_dir_and_delete_files &lt;- function() {\n  dir.create(path = \"data_cache\", showWarnings = FALSE)\n  unlink(x = list.files(path = \"data_cache\", full.names = TRUE))\n}\n\nfile_path &lt;- function(date) {\n  path &lt;- file.path(\"data_cache\", paste0(date, \".csv.gz\"))\n\n  path\n}\n\ndownload_data &lt;- function(date = today() - days(2)) {\n  year &lt;- year(date)\n\n  url &lt;- glue::glue(\"http://cran-logs.rstudio.com/{year}/{date}.csv.gz\")\n  path &lt;- file_path(date)\n\n  # download only if file does not exist\n  if (!file.exists(path)) download.file(url = url, destfile = path)\n\n  NULL\n}\n\nread_data &lt;- function(date = today() - days(2)) {\n  path &lt;- file_path(date)\n\n  df &lt;-\n    readr::read_csv(path, col_types = \"Dti---f-fi\", progress = FALSE) |&gt;\n    filter(!is.na(package)) |&gt;\n    mutate(hour = hms::trunc_hms(time, 60 * 60))\n\n  df\n}\n\ndownload_and_read &lt;- function(date = today() - days(2)) {\n  download_data(date)\n  read_data(date)\n}\n\n# tab 1: all traffic -----------------------------------------------------------\ncalc_valuebox_size &lt;- function(df) {\n  df$size |&gt;\n    as.numeric() |&gt;\n    sum() |&gt;\n    gdata::humanReadable()\n}\n\ncalc_valuebox_rows &lt;- function(df) {\n  df |&gt;\n    nrow() |&gt;\n    format_number()\n}\n\ncalc_valuebox_unique_ids &lt;- function(df) {\n  df$ip_id |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\ncalc_count_downloads &lt;- function(df) {\n  df |&gt;\n    count(ip_id, country, name = \"downloads\") |&gt;\n    arrange(desc(downloads))\n}\n\ncalc_whales_vs_non_whales_by_hour &lt;- function(df, whale_ip) {\n  whales_vs_non_whales_by_hour &lt;-\n    df |&gt;\n    mutate(\n      is_whale = ip_id %in% whale_ip\n    ) |&gt;\n    count(hour, is_whale, name = \"downloads\")\n\n  whales_vs_non_whales_by_hour\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\ncreate_ip_names &lt;- function(df_count, n_whales) {\n  df_count |&gt;\n    slice_head(n = n_whales) |&gt;\n    mutate(ip_name = paste0(\"WHALE_\", formatC(x = row_number(), width = 2, flag = \"0\"), \" [\", country, \"]\"))\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\n\n\n# tab 4: detail view ----------------------------------------------------------\ncalc_valuebox_unique_packages &lt;- function(df) {\n  df$package |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\n\n\n5.1.4 Plots\nHere we stored every function related to plotting things. They were stolen as-is from the original CRAN whales app code.\n\nCodemy_gg_theme &lt;- function() {\n  theme_minimal()\n}\n\n# tab 1: all traffic -------------------------------------------------------------\nplot_whales_vs_non_whales_by_hour &lt;- function(whales_vs_non_whales_by_hour) {\n  whales_vs_non_whales_by_hour |&gt;\n    ggplot(aes(hour, downloads, fill = is_whale)) +\n    geom_bar(stat = \"identity\") +\n    scale_fill_manual(\n      values = c(\"#666666\", \"#88FF99\"),\n      labels = c(\"no\", \"yes\")\n    ) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    scale_y_continuous(labels = scales::comma) +\n    my_gg_theme()\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\nplot_biggest_whales &lt;- function(biggest_whales) {\n  biggest_whales |&gt;\n    ggplot(aes(ip_name, downloads)) +\n    geom_bar(stat = \"identity\") +\n    ylab(\"Downloads on this day\") +\n    my_gg_theme()\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\nplot_downloads_by_hour_whales &lt;- function(downloads_by_hour_with_names) {\n  downloads_by_hour_with_names |&gt;\n    ggplot(aes(hour, downloads)) +\n    geom_bar(stat = \"identity\") +\n    facet_wrap(~ip_name) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    my_gg_theme()\n}\n\n# tab 4: detail view ----------------------------------------------------------\nplot_whale_data &lt;- function(whale_data) {\n  pkg &lt;- levels(whale_data$package)\n  breaks &lt;- pkg[seq(from = 1, to = length(pkg), length.out = 50) %&gt;%\n    as.integer() %&gt;%\n    c(1, length(pkg)) %&gt;%\n    unique()]\n\n  whale_data |&gt;\n    ggplot(aes(time, package)) +\n    geom_point() +\n    scale_x_time(\n      breaks = seq(hms::hms(0, 0, 0), by = 60 * 60 * 3, length.out = 9),\n      limits = c(hms::hms(0, 0, 0), hms::hms(0, 0, 24))\n    ) +\n    scale_y_discrete(breaks = breaks)\n}",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#profviz",
+    "href": "index.html#profviz",
+    "title": "The limits of Shiny",
+    "section": "\n6.1 profviz\n",
+    "text": "6.1 profviz\n\nFollowing this tutorial from the profviz package, I recorded one session of the app being used. I just roamed around a bit, changing the inputs and seeing some graphs.\nLooking at the profviz result, we can think of some changes to make in the app:\n\nThe function calc_whales_by_hour takes around 1/4 seconds to run; it is not bad, but with dozens of concurrent users this can be a problem.\n\nThe code for this function is simple:\n\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\n\nbut with 7 million rows this anti join can get a little slow. Every time you change the number of whales, this is recalculated. One solution is to calculate the counting just one time for every ip_id and already calculate the top 25 whales (which is the maximum number for the selectInput).\n\nDownloading the data takes a long time. Some files can have ~100MB. Reading them also takes time. We will cache these operations.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#shinyloadtest",
+    "href": "index.html#shinyloadtest",
+    "title": "The limits of Shiny",
+    "section": "\n6.2 shinyloadtest\n",
+    "text": "6.2 shinyloadtest\n\nFollowing the shinyloadtest docs, we have to:\n\nInstall shinycannon: a tool in Java to simulate \\(n\\) concurrent users. If you got any errors, take a look at your Java version.\nRun your app in a background job (to not block your R session).\n\nI created a directory called jobs/ where I stored these scripts. For example, to run App 1 deleting all the files in data_cache, I wrote\ndevtools::load_all()\nrun_app1(delete_files = TRUE)\nand then click to run as background job on RStudio.\n\nRun record_session: this will open a new tab where you can play around the app simulating a user; the output is a recording object.\n\nMore precisely, I ran\nshinyloadtest::record_session(glue::glue(\"http://127.0.0.1:8001\"), output_file = \"app1\")\n\nUse the shinycannon command to run the recording with \\(n\\) users. Here I chose \\(n = 10\\) and a minimum duration of 4 minutes. The output is saved on run_app1w10 (App 1, run with 10 workers).\n\nshinycannon app1 http://127.0.0.1:8001 --workers 10 --loaded-duration-minutes 4 --output-dir run_app1w10 --overwrite-output\nYou can see R/load_test.R for some auxiliary functions.\nThe complete report can be seen on my_runs.html, but here are some highlights:\n\n\nThe time spent by each user session. In an app with no delays, all sessions should finish at a close time.\n\n\n\nA detailed view of the time to load the home page per session. Notice that some users had to wait more than 30 seconds to load the home page.\n\n\n\nBoxplot of time spent on each task.\n\n\n\nThere is even an interesting plot which correlates the amount of time spent by a process with the amount of concurrent users. We can see that the load page time increases with the amount of users.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#footnotes",
+    "href": "index.html#footnotes",
+    "title": "The limits of Shiny",
+    "section": "",
+    "text": "see online version here or code here↩︎\nN = input$n_whales↩︎\nonly the last tab has widgets, so the other modules just receive a reactive and plot something.↩︎",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html",
+    "href": "simple-whale.html",
+    "title": "\n2  Simple whale\n",
+    "section": "",
+    "text": "3 Intro\nThis guide is a modern reading of the classic promises Case study: converting a Shiny app to async mixed with shinyloadtest Case study: Scaling an app.\nStarting with an innocent shiny app, we will do many steps to make it more performant and analyze how many people can use it at the same time, creating reports with shinyloadtest and shinycannon. The roadmap is the following:\nThe repo is structured as a R package to make it easy to track dependencies, load functions and share them between the apps.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#widgets",
+    "href": "simple-whale.html#widgets",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.1 Widgets",
+    "text": "4.1 Widgets\nThe app has two widgets in a sidebar: - a date selector, stored in input$date: the day of the downloads. - a numeric input with the amount of whales (that is: the top N downloaders); stored in input$n_whales. It goes from 1 to 25.\nThere is no button.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#the-data",
+    "href": "simple-whale.html#the-data",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.2 The data",
+    "text": "4.2 The data\nFor each selected date, the app should download the zipped file from http://cran-logs.rstudio.com/ and read it.\nWe will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server.\nEach zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:\n\n# df = download_and_read()\n# glimpse(df, n = 10)",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#tab-1-all-traffic",
+    "href": "simple-whale.html#tab-1-all-traffic",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.3 Tab 1: All traffic",
+    "text": "4.3 Tab 1: All traffic\nThis tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs. non-whales. You can see the impact of 6 users compared to the total ~58k users.\n\nWe need to calculate the top N whales2 and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs. non-whale.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#tab-2-biggest-whales",
+    "href": "simple-whale.html#tab-2-biggest-whales",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.4 Tab 2: Biggest whales",
+    "text": "4.4 Tab 2: Biggest whales\nHere we compare the amount of downloads between the whales in a single day.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#tab-3-whales-by-hour",
+    "href": "simple-whale.html#tab-3-whales-by-hour",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.5 Tab 3: Whales by hour",
+    "text": "4.5 Tab 3: Whales by hour\nFor each whale in a facet, count the downloads by hour.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#tab-4-detail-view",
+    "href": "simple-whale.html#tab-4-detail-view",
+    "title": "\n2  Simple whale\n",
+    "section": "\n4.6 Tab 4: Detail view",
+    "text": "4.6 Tab 4: Detail view\nIn the detail view, we can see which package was downloaded in a timeline by selecting a whale.\n\n\nA whale that downloaded many packages all the time\n\n\n\nA whale that downloaded one package at a time, in a organized manner",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#code",
+    "href": "simple-whale.html#code",
+    "title": "\n2  Simple whale\n",
+    "section": "\n5.1 Code",
+    "text": "5.1 Code\nHere I show a bit of code; this session can be skipped, but some details about the server will be needed later.\n\n5.1.1 UI\nThe UI simply call the modules\n\nui1 &lt;- function() {\n  ui &lt;- page_navbar(\n    title = \"CRAM whales 2.0\",\n    theme = my_bs_theme(),\n    sidebar = sidebar(\n      dateInput(inputId = \"date\", label = \"Date\", value = app_start_date(), max = app_start_date()),\n      numericInput(inputId = \"n_whales\", label = \"Show top N downloaders:\", 6, min = 1, max = 25, step = 1)\n    ),\n    nav_panel(title = \"All traffic\", md1.all_traffic_UI()),\n    nav_panel(title = \"Biggest whales\", md1.biggest_whales_UI()),\n    nav_panel(title = \"Whales by hour\", md1.whales_by_hour_UI()),\n    nav_panel(title = \"Detail view\", md1.detail_view_UI())\n  )\n\n  ui\n}\n\n\n5.1.2 Server\nIn the server I tried to calculate all necessary reactives to pass to modules; reactives have a rc. to be easy to remember which objects are reactive and which are not.\n\nCodeserver1 &lt;- function(input, output, session) {\n  # rc.data: read data ------------------------------------------------------\n  rc.data &lt;- reactive({\n    download_and_read(input$date)\n  }) |&gt;\n    bindEvent(input$date)\n\n\n  # Tab 1: All traffic ------------------------------------------------------\n  # rc.count: simple counting -----------------------------------------------\n  rc.count &lt;- reactive({\n    calc_count_downloads(rc.data())\n  })\n\n  # rc.whales: separate the whales ------------------------------------------\n  rc.whales &lt;- reactive({\n    create_ip_names(rc.count(), input$n_whales)\n  }) |&gt;\n    bindEvent(input$n_whales, rc.count())\n\n  rc.whales_vs_non_whales_by_hour &lt;- reactive({\n    calc_whales_vs_non_whales_by_hour(df = rc.data(), whale_ip = rc.whales()$ip_id)\n  })\n\n  # rc.valueboxes ------------------------------------------------------------\n  rc.valuebox1 &lt;- reactive({\n    calc_valuebox_size(rc.data())\n  })\n\n  rc.valuebox2 &lt;- reactive({\n    calc_valuebox_rows(rc.data())\n  })\n\n  rc.valuebox3 &lt;- reactive({\n    calc_valuebox_unique_ids(rc.data())\n  })\n\n  # Tab 2: Biggest whales ---------------------------------------------------\n  # reuse rc.whales\n\n\n  # Tab 3: Whales by hour ---------------------------------------------------\n  # rc.downloads_by_hour_with_names -----------------------------------------\n  rc.downloads_by_hour_with_names &lt;- reactive({\n    calc_whales_by_hour(rc.data(), rc.whales())\n  })\n\n\n  # Tab 4: Detail view ------------------------------------------------------\n  # uses rc.data and rc.whales\n\n  # modules -----------------------------------------------------------------\n  md1.all_traffic_server(\n    rc.valuebox1 = rc.valuebox1, rc.valuebox2 = rc.valuebox2, rc.valuebox3 = rc.valuebox3,\n    rc.whales_vs_non_whales_by_hour = rc.whales_vs_non_whales_by_hour\n  )\n\n  md1.biggest_whales_server(rc.biggest_whales = rc.whales)\n  md1.whales_by_hour_server(rc.downloads_by_hour_with_names = rc.downloads_by_hour_with_names)\n  md1.detail_view_server(rc.data = rc.data, rc.whales = rc.whales)\n}\n\n\n\n5.1.3 Data\nThe r/data.R file has all the functions necessary to read files and do the calculations.\n\nCode# read data ---------------------------------------------------------------\ncreate_dir_and_delete_files &lt;- function() {\n  dir.create(path = \"data_cache\", showWarnings = FALSE)\n  unlink(x = list.files(path = \"data_cache\", full.names = TRUE))\n}\n\nfile_path &lt;- function(date) {\n  path &lt;- file.path(\"data_cache\", paste0(date, \".csv.gz\"))\n\n  path\n}\n\ndownload_data &lt;- function(date = today() - days(2)) {\n  year &lt;- year(date)\n\n  url &lt;- glue::glue(\"http://cran-logs.rstudio.com/{year}/{date}.csv.gz\")\n  path &lt;- file_path(date)\n\n  # download only if file does not exist\n  if (!file.exists(path)) download.file(url = url, destfile = path)\n\n  NULL\n}\n\nread_data &lt;- function(date = today() - days(2)) {\n  path &lt;- file_path(date)\n\n  df &lt;-\n    readr::read_csv(path, col_types = \"Dti---f-fi\", progress = FALSE) |&gt;\n    filter(!is.na(package)) |&gt;\n    mutate(hour = hms::trunc_hms(time, 60 * 60))\n\n  df\n}\n\ndownload_and_read &lt;- function(date = today() - days(2)) {\n  download_data(date)\n  read_data(date)\n}\n\n# tab 1: all traffic -----------------------------------------------------------\ncalc_valuebox_size &lt;- function(df) {\n  df$size |&gt;\n    as.numeric() |&gt;\n    sum() |&gt;\n    gdata::humanReadable()\n}\n\ncalc_valuebox_rows &lt;- function(df) {\n  df |&gt;\n    nrow() |&gt;\n    format_number()\n}\n\ncalc_valuebox_unique_ids &lt;- function(df) {\n  df$ip_id |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\ncalc_count_downloads &lt;- function(df) {\n  df |&gt;\n    count(ip_id, country, name = \"downloads\") |&gt;\n    arrange(desc(downloads))\n}\n\ncalc_whales_vs_non_whales_by_hour &lt;- function(df, whale_ip) {\n  whales_vs_non_whales_by_hour &lt;-\n    df |&gt;\n    mutate(\n      is_whale = ip_id %in% whale_ip\n    ) |&gt;\n    count(hour, is_whale, name = \"downloads\")\n\n  whales_vs_non_whales_by_hour\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\ncreate_ip_names &lt;- function(df_count, n_whales) {\n  df_count |&gt;\n    slice_head(n = n_whales) |&gt;\n    mutate(ip_name = paste0(\"WHALE_\", formatC(x = row_number(), width = 2, flag = \"0\"), \" [\", country, \"]\"))\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\n\n\n# tab 4: detail view ----------------------------------------------------------\ncalc_valuebox_unique_packages &lt;- function(df) {\n  df$package |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\n\n\n5.1.4 Plots\nHere we stored every function related to plotting things. They were stolen as-is from the original CRAN whales app code.\n\nCodemy_gg_theme &lt;- function() {\n  theme_minimal()\n}\n\n# tab 1: all traffic -------------------------------------------------------------\nplot_whales_vs_non_whales_by_hour &lt;- function(whales_vs_non_whales_by_hour) {\n  whales_vs_non_whales_by_hour |&gt;\n    ggplot(aes(hour, downloads, fill = is_whale)) +\n    geom_bar(stat = \"identity\") +\n    scale_fill_manual(\n      values = c(\"#666666\", \"#88FF99\"),\n      labels = c(\"no\", \"yes\")\n    ) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    scale_y_continuous(labels = scales::comma) +\n    my_gg_theme()\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\nplot_biggest_whales &lt;- function(biggest_whales) {\n  biggest_whales |&gt;\n    ggplot(aes(ip_name, downloads)) +\n    geom_bar(stat = \"identity\") +\n    ylab(\"Downloads on this day\") +\n    my_gg_theme()\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\nplot_downloads_by_hour_whales &lt;- function(downloads_by_hour_with_names) {\n  downloads_by_hour_with_names |&gt;\n    ggplot(aes(hour, downloads)) +\n    geom_bar(stat = \"identity\") +\n    facet_wrap(~ip_name) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    my_gg_theme()\n}\n\n# tab 4: detail view ----------------------------------------------------------\nplot_whale_data &lt;- function(whale_data) {\n  pkg &lt;- levels(whale_data$package)\n  breaks &lt;- pkg[seq(from = 1, to = length(pkg), length.out = 50) %&gt;%\n    as.integer() %&gt;%\n    c(1, length(pkg)) %&gt;%\n    unique()]\n\n  whale_data |&gt;\n    ggplot(aes(time, package)) +\n    geom_point() +\n    scale_x_time(\n      breaks = seq(hms::hms(0, 0, 0), by = 60 * 60 * 3, length.out = 9),\n      limits = c(hms::hms(0, 0, 0), hms::hms(0, 0, 24))\n    ) +\n    scale_y_discrete(breaks = breaks)\n}",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#profviz",
+    "href": "simple-whale.html#profviz",
+    "title": "\n2  Simple whale\n",
+    "section": "\n6.1 profviz\n",
+    "text": "6.1 profviz\n\nFollowing this tutorial from the profviz package, I recorded one session of the app being used. I just roamed around a bit, changing the inputs and seeing some graphs.\nLooking at the profviz result, we can think of some changes to make in the app:\n\nThe function calc_whales_by_hour takes around 1/4 seconds to run; it is not bad, but with dozens of concurrent users this can be a problem.\n\nThe code for this function is simple:\n\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\n\nbut with 7 million rows this anti join can get a little slow. Every time you change the number of whales, this is recalculated. One solution is to calculate the counting just one time for every ip_id and already calculate the top 25 whales (which is the maximum number for the selectInput).\n\nDownloading the data takes a long time. Some files can have ~100MB. Reading them also takes time. We will cache these operations.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#shinyloadtest",
+    "href": "simple-whale.html#shinyloadtest",
+    "title": "\n2  Simple whale\n",
+    "section": "\n6.2 shinyloadtest\n",
+    "text": "6.2 shinyloadtest\n\nFollowing the shinyloadtest docs, we have to:\n\nInstall shinycannon: a tool in Java to simulate \\(n\\) concurrent users. If you got any errors, take a look at your Java version.\nRun your app in a background job (to not block your R session).\n\nI created a directory called jobs/ where I stored these scripts. For example, to run App 1 deleting all the files in data_cache, I wrote\ndevtools::load_all()\nrun_app1(delete_files = TRUE)\nand then click to run as background job on RStudio.\n\nRun record_session: this will open a new tab where you can play around the app simulating a user; the output is a recording object.\n\nMore precisely, I ran\nshinyloadtest::record_session(glue::glue(\"http://127.0.0.1:8001\"), output_file = \"app1\")\n\nUse the shinycannon command to run the recording with \\(n\\) users. Here I chose \\(n = 10\\) and a minimum duration of 4 minutes. The output is saved on run_app1w10 (App 1, run with 10 workers).\n\nshinycannon app1 http://127.0.0.1:8001 --workers 10 --loaded-duration-minutes 4 --output-dir run_app1w10 --overwrite-output\nYou can see R/load_test.R for some auxiliary functions.\nThe complete report can be seen on my_runs.html, but here are some highlights:\n\n\nThe time spent by each user session. In an app with no delays, all sessions should finish at a close time.\n\n\n\nA detailed view of the time to load the home page per session. Notice that some users had to wait more than 30 seconds to load the home page.\n\n\n\nBoxplot of time spent on each task.\n\n\n\nThere is even an interesting plot which correlates the amount of time spent by a process with the amount of concurrent users. We can see that the load page time increases with the amount of users.",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "simple-whale.html#footnotes",
+    "href": "simple-whale.html#footnotes",
+    "title": "\n2  Simple whale\n",
+    "section": "",
+    "text": "see online version here or code here↩︎\nN = input$n_whales↩︎\nonly the last tab has widgets, so the other modules just receive a reactive and plot something.↩︎",
+    "crumbs": [
+      "Part 1: The CRAN whales app",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Simple whale</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intro.html",
+    "href": "whale-intro.html",
+    "title": "\n2  The CRAN whales app\n",
+    "section": "",
+    "text": "2.1 A tour by CRAN whales\nThis guide is a modern reading of the classic promises Case study: converting a Shiny app to async mixed with shinyloadtest Case study: Scaling an app.\nStarting with an innocent shiny app, we will do many steps to make it more performant and analyze how many people can use it at the same time, creating reports with shinyloadtest and shinycannon. The roadmap is the following:\nThe repo is structured as a R package to make it easy to track dependencies, load functions and share them between the apps.\nYou can see it online or follow me in this guided tour.\nThe app intention is to show the whales: certain IPs that download a lot of data from CRAN. Let me describe its features.",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>The CRAN whales app</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intro.html#a-tour-by-cran-whales",
+    "href": "whale-intro.html#a-tour-by-cran-whales",
+    "title": "\n2  The CRAN whales app\n",
+    "section": "",
+    "text": "2.1.1 Widgets\nThe app has two widgets in a sidebar: - a date selector, stored in input$date: the day of the downloads. - a numeric input with the amount of whales (that is: the top N downloaders); stored in input$n_whales. It goes from 1 to 25.\nThere is no button.\n\n\n2.1.2 The data\nFor each selected date, the app should download the zipped file from http://cran-logs.rstudio.com/ and read it.\nWe will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server.\nEach zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:\n\n# df = download_and_read()\n# glimpse(df, n = 10)",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>The CRAN whales app</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intro.html#the-app",
+    "href": "whale-intro.html#the-app",
+    "title": "\n2  The CRAN whales app\n",
+    "section": "\n2.2 The app",
+    "text": "2.2 The app\n\n2.2.1 Tab 1: All traffic\nThis tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs. non-whales. You can see the impact of 6 users compared to the total ~58k users.\n\nWe need to calculate the top N whales2 and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs. non-whale.\n\n2.2.2 Tab 2: Biggest whales\nHere we compare the amount of downloads between the whales in a single day.\n\n\n2.2.3 Tab 3: Whales by hour\nFor each whale in a facet, count the downloads by hour.\n\n\n2.2.4 Tab 4: Detail view\nIn the detail view, we can see which package was downloaded in a timeline by selecting a whale.\n\n\nA whale that downloaded many packages all the time\n\n\n\nA whale that downloaded one package at a time, in a organized manner",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>The CRAN whales app</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intro.html#footnotes",
+    "href": "whale-intro.html#footnotes",
+    "title": "\n2  The CRAN whales app\n",
+    "section": "",
+    "text": "see online version here or code here↩︎\nN = input$n_whales↩︎",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>The CRAN whales app</span>"
+    ]
+  },
+  {
+    "objectID": "whale-v1.html",
+    "href": "whale-v1.html",
+    "title": "\n3  Version 1: a simple approach\n",
+    "section": "",
+    "text": "3.1 Code\nI’ve made some changes compared to the original 2018 CRAN whales app:\nTo run the app, load all dependencies with devtools::load_all() (or control+shift+L, in RStudio) and just run\nHere I show a bit of code; this session can be skipped, but some details about the server will be needed later.",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Version 1: a simple approach</span>"
+    ]
+  },
+  {
+    "objectID": "whale-v1.html#code",
+    "href": "whale-v1.html#code",
+    "title": "\n3  Version 1: a simple approach\n",
+    "section": "",
+    "text": "3.1.1 UI\nThe UI simply call the modules\n\nui1 &lt;- function() {\n  ui &lt;- page_navbar(\n    title = \"CRAM whales 2.0\",\n    theme = my_bs_theme(),\n    sidebar = sidebar(\n      dateInput(inputId = \"date\", label = \"Date\", value = app_start_date(), max = app_start_date()),\n      numericInput(inputId = \"n_whales\", label = \"Show top N downloaders:\", 6, min = 1, max = 25, step = 1)\n    ),\n    nav_panel(title = \"All traffic\", md1.all_traffic_UI()),\n    nav_panel(title = \"Biggest whales\", md1.biggest_whales_UI()),\n    nav_panel(title = \"Whales by hour\", md1.whales_by_hour_UI()),\n    nav_panel(title = \"Detail view\", md1.detail_view_UI())\n  )\n\n  ui\n}\n\n\n3.1.2 Server\nIn the server I tried to calculate all necessary reactives to pass to modules; reactives have a rc. to be easy to remember which objects are reactive and which are not.\n\nCodeserver1 &lt;- function(input, output, session) {\n  # rc.data: read data ------------------------------------------------------\n  rc.data &lt;- reactive({\n    download_and_read(input$date)\n  }) |&gt;\n    bindEvent(input$date)\n\n\n  # Tab 1: All traffic ------------------------------------------------------\n  # rc.count: simple counting -----------------------------------------------\n  rc.count &lt;- reactive({\n    calc_count_downloads(rc.data())\n  })\n\n  # rc.whales: separate the whales ------------------------------------------\n  rc.whales &lt;- reactive({\n    create_ip_names(rc.count(), input$n_whales)\n  }) |&gt;\n    bindEvent(input$n_whales, rc.count())\n\n  rc.whales_vs_non_whales_by_hour &lt;- reactive({\n    calc_whales_vs_non_whales_by_hour(df = rc.data(), whale_ip = rc.whales()$ip_id)\n  })\n\n  # rc.valueboxes ------------------------------------------------------------\n  rc.valuebox1 &lt;- reactive({\n    calc_valuebox_size(rc.data())\n  })\n\n  rc.valuebox2 &lt;- reactive({\n    calc_valuebox_rows(rc.data())\n  })\n\n  rc.valuebox3 &lt;- reactive({\n    calc_valuebox_unique_ids(rc.data())\n  })\n\n  # Tab 2: Biggest whales ---------------------------------------------------\n  # reuse rc.whales\n\n\n  # Tab 3: Whales by hour ---------------------------------------------------\n  # rc.downloads_by_hour_with_names -----------------------------------------\n  rc.downloads_by_hour_with_names &lt;- reactive({\n    calc_whales_by_hour(rc.data(), rc.whales())\n  })\n\n\n  # Tab 4: Detail view ------------------------------------------------------\n  # uses rc.data and rc.whales\n\n  # modules -----------------------------------------------------------------\n  md1.all_traffic_server(\n    rc.valuebox1 = rc.valuebox1, rc.valuebox2 = rc.valuebox2, rc.valuebox3 = rc.valuebox3,\n    rc.whales_vs_non_whales_by_hour = rc.whales_vs_non_whales_by_hour\n  )\n\n  md1.biggest_whales_server(rc.biggest_whales = rc.whales)\n  md1.whales_by_hour_server(rc.downloads_by_hour_with_names = rc.downloads_by_hour_with_names)\n  md1.detail_view_server(rc.data = rc.data, rc.whales = rc.whales)\n}\n\n\n\n3.1.3 Data\nThe r/data.R file has all the functions necessary to read files and do the calculations.\n\nCode# read data ---------------------------------------------------------------\ncreate_dir_and_delete_files &lt;- function() {\n  dir.create(path = \"data_cache\", showWarnings = FALSE)\n  unlink(x = list.files(path = \"data_cache\", full.names = TRUE))\n}\n\nfile_path &lt;- function(date) {\n  path &lt;- file.path(\"data_cache\", paste0(date, \".csv.gz\"))\n\n  path\n}\n\ndownload_data &lt;- function(date = today() - days(2)) {\n  year &lt;- year(date)\n\n  url &lt;- glue::glue(\"http://cran-logs.rstudio.com/{year}/{date}.csv.gz\")\n  path &lt;- file_path(date)\n\n  # download only if file does not exist\n  if (!file.exists(path)) download.file(url = url, destfile = path)\n\n  NULL\n}\n\nread_data &lt;- function(date = today() - days(2)) {\n  path &lt;- file_path(date)\n\n  df &lt;-\n    readr::read_csv(path, col_types = \"Dti---f-fi\", progress = FALSE) |&gt;\n    filter(!is.na(package)) |&gt;\n    mutate(hour = hms::trunc_hms(time, 60 * 60))\n\n  df\n}\n\ndownload_and_read &lt;- function(date = today() - days(2)) {\n  download_data(date)\n  read_data(date)\n}\n\n# tab 1: all traffic -----------------------------------------------------------\ncalc_valuebox_size &lt;- function(df) {\n  df$size |&gt;\n    as.numeric() |&gt;\n    sum() |&gt;\n    gdata::humanReadable()\n}\n\ncalc_valuebox_rows &lt;- function(df) {\n  df |&gt;\n    nrow() |&gt;\n    format_number()\n}\n\ncalc_valuebox_unique_ids &lt;- function(df) {\n  df$ip_id |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\ncalc_count_downloads &lt;- function(df) {\n  df |&gt;\n    count(ip_id, country, name = \"downloads\") |&gt;\n    arrange(desc(downloads))\n}\n\ncalc_whales_vs_non_whales_by_hour &lt;- function(df, whale_ip) {\n  whales_vs_non_whales_by_hour &lt;-\n    df |&gt;\n    mutate(\n      is_whale = ip_id %in% whale_ip\n    ) |&gt;\n    count(hour, is_whale, name = \"downloads\")\n\n  whales_vs_non_whales_by_hour\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\ncreate_ip_names &lt;- function(df_count, n_whales) {\n  df_count |&gt;\n    slice_head(n = n_whales) |&gt;\n    mutate(ip_name = paste0(\"WHALE_\", formatC(x = row_number(), width = 2, flag = \"0\"), \" [\", country, \"]\"))\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\n\n\n# tab 4: detail view ----------------------------------------------------------\ncalc_valuebox_unique_packages &lt;- function(df) {\n  df$package |&gt;\n    unique() |&gt;\n    length() |&gt;\n    format_number()\n}\n\n\n\n3.1.4 Plots\nHere we stored every function related to plotting things. They were stolen as-is from the original CRAN whales app code.\n\nCodemy_gg_theme &lt;- function() {\n  theme_minimal()\n}\n\n# tab 1: all traffic -------------------------------------------------------------\nplot_whales_vs_non_whales_by_hour &lt;- function(whales_vs_non_whales_by_hour) {\n  whales_vs_non_whales_by_hour |&gt;\n    ggplot(aes(hour, downloads, fill = is_whale)) +\n    geom_bar(stat = \"identity\") +\n    scale_fill_manual(\n      values = c(\"#666666\", \"#88FF99\"),\n      labels = c(\"no\", \"yes\")\n    ) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    scale_y_continuous(labels = scales::comma) +\n    my_gg_theme()\n}\n\n# tab 2: biggest whales ------------------------------------------------------------------\nplot_biggest_whales &lt;- function(biggest_whales) {\n  biggest_whales |&gt;\n    ggplot(aes(ip_name, downloads)) +\n    geom_bar(stat = \"identity\") +\n    ylab(\"Downloads on this day\") +\n    my_gg_theme()\n}\n\n# tab 3: whales by hour ----------------------------------------------------------\nplot_downloads_by_hour_whales &lt;- function(downloads_by_hour_with_names) {\n  downloads_by_hour_with_names |&gt;\n    ggplot(aes(hour, downloads)) +\n    geom_bar(stat = \"identity\") +\n    facet_wrap(~ip_name) +\n    ylab(\"Downloads\") +\n    xlab(\"Hour\") +\n    my_gg_theme()\n}\n\n# tab 4: detail view ----------------------------------------------------------\nplot_whale_data &lt;- function(whale_data) {\n  pkg &lt;- levels(whale_data$package)\n  breaks &lt;- pkg[seq(from = 1, to = length(pkg), length.out = 50) %&gt;%\n    as.integer() %&gt;%\n    c(1, length(pkg)) %&gt;%\n    unique()]\n\n  whale_data |&gt;\n    ggplot(aes(time, package)) +\n    geom_point() +\n    scale_x_time(\n      breaks = seq(hms::hms(0, 0, 0), by = 60 * 60 * 3, length.out = 9),\n      limits = c(hms::hms(0, 0, 0), hms::hms(0, 0, 24))\n    ) +\n    scale_y_discrete(breaks = breaks)\n}",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Version 1: a simple approach</span>"
+    ]
+  },
+  {
+    "objectID": "whale-v1.html#footnotes",
+    "href": "whale-v1.html#footnotes",
+    "title": "\n3  Version 1: a simple approach\n",
+    "section": "",
+    "text": "only the last tab has widgets, so the other modules just receive a reactive and plot something.↩︎",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Version 1: a simple approach</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intermezzo.html",
+    "href": "whale-intermezzo.html",
+    "title": "\n4  Intermezzo: profiling whale v1\n",
+    "section": "",
+    "text": "4.1 profviz\nThere are two ways to measure the performance of this app:\nFollowing this tutorial from the profviz package, I recorded one session of the app being used. I just roamed around a bit, changing the inputs and seeing some graphs.\nLooking at the profviz result, we can think of some changes to make in the app:\nThe code for this function is simple:\ncalc_whales_by_hour &lt;- function(df, df_whales) {\n  whales_by_hour &lt;-\n    df |&gt;\n    inner_join(df_whales, by = \"ip_id\") |&gt;\n    count(hour, ip_name, name = \"downloads\")\n\n  whales_by_hour\n}\nbut with 7 million rows this anti join can get a little slow. Every time you change the number of whales, this is recalculated. One solution is to calculate the counting just one time for every ip_id and already calculate the top 25 whales (which is the maximum number for the selectInput).",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Intermezzo: profiling whale v1</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intermezzo.html#profviz",
+    "href": "whale-intermezzo.html#profviz",
+    "title": "\n4  Intermezzo: profiling whale v1\n",
+    "section": "",
+    "text": "The function calc_whales_by_hour takes around 1/4 seconds to run; it is not bad, but with dozens of concurrent users this can be a problem.\n\n\n\n\n\nDownloading the data takes a long time. Some files can have ~100MB. Reading them also takes time. We will cache these operations.",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Intermezzo: profiling whale v1</span>"
+    ]
+  },
+  {
+    "objectID": "whale-intermezzo.html#shinyloadtest",
+    "href": "whale-intermezzo.html#shinyloadtest",
+    "title": "\n4  Intermezzo: profiling whale v1\n",
+    "section": "\n4.2 shinyloadtest\n",
+    "text": "4.2 shinyloadtest\n\nFollowing the shinyloadtest docs, we have to:\n\nInstall shinycannon: a tool in Java to simulate \\(n\\) concurrent users. If you got any errors, take a look at your Java version.\nRun your app in a background job (to not block your R session).\n\nI created a directory called jobs/ where I stored these scripts. For example, to run App 1 deleting all the files in data_cache, I wrote\ndevtools::load_all()\nrun_app1(delete_files = TRUE)\nand then click to run as background job on RStudio.\n\nRun record_session: this will open a new tab where you can play around the app simulating a user; the output is a recording object.\n\nMore precisely, I ran\nshinyloadtest::record_session(glue::glue(\"http://127.0.0.1:8001\"), output_file = \"app1\")\n\nUse the shinycannon command to run the recording with \\(n\\) users. Here I chose \\(n = 10\\) and a minimum duration of 4 minutes. The output is saved on run_app1w10 (App 1, run with 10 workers).\n\nshinycannon app1 http://127.0.0.1:8001 --workers 10 --loaded-duration-minutes 4 --output-dir run_app1w10 --overwrite-output\nYou can see R/load_test.R for some auxiliary functions.\nThe complete report can be seen on my_runs.html, but here are some highlights:\n\n\nThe time spent by each user session. In an app with no delays, all sessions should finish at a close time.\n\n\n\nA detailed view of the time to load the home page per session. Notice that some users had to wait more than 30 seconds to load the home page.\n\n\n\nBoxplot of time spent on each task.\n\n\n\nThere is even an interesting plot which correlates the amount of time spent by a process with the amount of concurrent users. We can see that the load page time increases with the amount of users.",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Intermezzo: profiling whale v1</span>"
+    ]
+  },
+  {
+    "objectID": "whale-v2.html",
+    "href": "whale-v2.html",
+    "title": "\n5  Version 2: avoid redundances and cache what you can\n",
+    "section": "",
+    "text": "We modified the server of App 1 as follows:\n#| code-fold: true\n\nserver2 &lt;- function(input, output, session) {\n  # rc.data: read data ------------------------------------------------------\n  rc.data &lt;- reactive({\n    download_and_read(input$date)\n  }) |&gt;\n    bindCache(input$date) |&gt;\n    bindEvent(input$date)\n\n  # Tab 1: All traffic ------------------------------------------------------\n  # rc.count: simple counting -----------------------------------------------\n  rc.count &lt;- reactive({\n    calc_count_downloads(rc.data())\n  }) |&gt;\n    bindCache(input$date)\n\n  # rc.whales: separate the whales ------------------------------------------\n  rc.whales &lt;- reactive({\n    create_ip_names(rc.count(), input$n_whales)\n  }) |&gt;\n    bindCache(input$date, input$n_whales)\n\n  rc.whales_vs_non_whales_by_hour &lt;- reactive({\n    calc_whales_vs_non_whales_by_hour(df = rc.data(), whale_ip = rc.whales()$ip_id)\n  }) |&gt;\n    bindCache(input$date, input$n_whales)\n\n  # rc.valueboxes ------------------------------------------------------------\n  rc.valuebox1 &lt;- reactive({\n    calc_valuebox_size(rc.data())\n  })\n\n  rc.valuebox2 &lt;- reactive({\n    calc_valuebox_rows(rc.data())\n  })\n\n  rc.valuebox3 &lt;- reactive({\n    calc_valuebox_unique_ids(rc.data())\n  })\n\n  # Tab 2: Biggest whales ---------------------------------------------------\n  # reuse rc.whales\n\n\n  # Tab 3: Whales by hour ---------------------------------------------------\n  # rc.downloads_by_hour_with_names -----------------------------------------\n  rc.downloads_by_hour_with_names &lt;- reactive({\n    calc_whales_by_hour(rc.data(), rc.whales())\n  }) |&gt;\n    bindCache(input$date, input$n_whales)\n\n\n  # Tab 4: Detail view ------------------------------------------------------\n  # uses rc.data and rc.whales\n\n  # modules -----------------------------------------------------------------\n  md1.all_traffic_server(\n    rc.valuebox1 = rc.valuebox1, rc.valuebox2 = rc.valuebox2, rc.valuebox3 = rc.valuebox3,\n    rc.whales_vs_non_whales_by_hour = rc.whales_vs_non_whales_by_hour\n  )\n\n  md1.biggest_whales_server(rc.biggest_whales = rc.whales)\n  md1.whales_by_hour_server(rc.downloads_by_hour_with_names = rc.downloads_by_hour_with_names)\n  md2.detail_view_server(rc.data = rc.data, rc.whales = rc.whales)\n}\n\nWe also cached the plots, for example in the last module:\n!!!\nWe run run_app2() and see that only the first running of a given function is really calculated; the rest is cached.\n\n5.0.1 Some key points when using bindCache\n\n\nThe cache key can’t be too big. Using the entire rc.data() would be slow. Since there is a bijection between days and rc.data, we can use solely the date.\n\n\n\n\n\n\n\nbindCache docs\n\n\n\nTo compute the cache key, bindCache() hashes the contents of …, so it’s best to avoid including large objects in a cache key since that can result in slow hashing. It’s also best to avoid reference objects like environments and R6 objects, since the serialization of these objects may not capture relevant changes.\nIf you want to use a large object as part of a cache key, it may make sense to do some sort of reduction on the data that still captures information about whether a value can be retrieved from the cache. For example, if you have a large data set with timestamps, it might make sense to extract the most recent timestamp and return that. Then, instead of hashing the entire data object, the cached reactive only needs to hash the timestamp.\nr &lt;- reactive({ compute(bigdata()) } %&gt;%\n  bindCache({ extract_most_recent_time(bigdata()) })\n\n\n\nSaving a big object in the disk takes time! The first time we read a file, a copy of rc.data is going to be saved as a RDS file in the myapp-cache dir. This can take some seconds to finish.\nWe are using shinyOptions(cache = cachem::cache_disk(\"./myapp-cache\", max_size = 1024 * 1024^2, logfile = stdout(), evict = \"lru\")) as the caching options. This means that the cache will be saved on disk so all users (even in different sessions) can access the cache. The files will be saved up to 1GB and then the least used will be deleted.",
+    "crumbs": [
+      "Part 1: many levels of optimization",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Version 2: avoid redundances and cache what you can</span>"
+    ]
+  }
+]

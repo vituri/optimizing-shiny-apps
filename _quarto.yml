@@ -1,0 +1,59 @@
+project:
+  type: book
+  output-dir: docs
+
+execute:
+  # freeze: auto
+  eval: true
+  echo: true
+  warning: false
+  message: false
+  # cache: true
+
+book:
+  title: "Optimizing Shiny apps"
+  subtitle: "A hands-on guide to extract maximum performance"
+  author: "G. Vituri"
+  date: "3/12/2025"
+  page-navigation: true
+  reader-mode: true
+  
+  page-footer:
+    left: |
+      Text here
+    right: |
+      This book was built with <a href="https://quarto.org/">Quarto</a>.
+  
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - part: "Part 1: many levels of optimization"
+      chapters:
+      - whale-intro.qmd
+      - whale-v1.qmd
+      - whale-intermezzo.qmd
+      - whale-v2.qmd
+      - whale-v3.qmd
+      - whale-v4.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+biblio-style: apalike
+link-citations: true
+links-as-notes: true
+
+format:
+  html:
+    theme: lux
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    toc-expand: true
+    bibliography: sources.bib
+    highlight-style: github
+    page-layout: full
+    code-link: true
+    callout-appearance: simple
+  pdf: default
