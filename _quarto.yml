@@ -27,14 +27,18 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    - part: "Part 1: many levels of optimization"
+    - part: part-levels.qmd
       chapters:
       - whale-intro.qmd
-      - whale-v1.qmd
-      - whale-intermezzo.qmd
-      - whale-v2.qmd
-      - whale-v3.qmd
-      - whale-v4.qmd
+      - whale-simple.qmd
+      - whale-profiling.qmd
+      - whale-reactive-graph.qmd
+      - whale-cache.qmd
+      - whale-async.qmd
+      - whale-backend.qmd
+      - whale-languages.qmd
+    - part: part-data.qmd
+    - part: part-cloud.qmd
     - summary.qmd
     - references.qmd
 
@@ -56,4 +60,7 @@ format:
     page-layout: full
     code-link: true
     callout-appearance: simple
+    mermaid:
+      theme: forest
+
   pdf: default

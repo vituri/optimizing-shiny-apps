@@ -1,6 +1,12 @@
 ---
-title: "Intermezzo: profiling whale v1"
+title: "How fast is my app? Identifying bottlenecks"
 ---
+
+## Profiling R code
+
+- bench::mark
+
+## Profiling shiny apps
 
 There are two ways to measure the performance of this app: 
 
@@ -8,7 +14,7 @@ There are two ways to measure the performance of this app:
 
 - We can analyze the behavior of $n$ concurrent users in the app and see what functions/outputs/reactives are taking more time. Remember: since R is single-threaded, if 10 people are using the app and one session triggers a slow calculation, all sessions will have to wait for it to finish. We will use `shinyloadtest` for that.
 
-## `profviz`
+### `profviz`
 
 Following [this tutorial](https://profvis.r-lib.org/articles/examples.html#example-3---profiling-a-shiny-application) from the `profviz` package, I recorded one session of the app being used. I just roamed around a bit, changing the inputs and seeing some graphs.
 
@@ -33,7 +39,7 @@ but with 7 million rows this anti join can get a little slow. Every time you cha
 
 - Downloading the data takes a long time. Some files can have ~100MB. Reading them also takes time. We will cache these operations.
 
-## `shinyloadtest`
+### `shinyloadtest`
 
 Following the [`shinyloadtest` docs](https://rstudio.github.io/shinyloadtest/index.html), we have to:
 

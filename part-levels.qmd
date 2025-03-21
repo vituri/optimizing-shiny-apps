@@ -1,0 +1,16 @@
+---
+title: "Part 1: the many levels of optimization"
+---
+
+```{mermaid}
+%%| echo: false
+%%| fig-align: center
+
+flowchart TD
+
+A[Simple app] --> B[Remove redundancy: watch the reactive graph]
+B --> C[Cache and memoise whatever you can]
+C --> D[Go async: run many calculations at once in the background]
+D --> E[Expose the backend: use other hardware]
+E --> F[Using faster languages]
+```

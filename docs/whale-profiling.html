@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.7.13">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>2&nbsp; The CRAN whales app – Optimizing Shiny apps</title>
+<title>4&nbsp; How fast is my app? Identifying bottlenecks – Optimizing Shiny apps</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -60,8 +60,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./whale-simple.html" rel="next">
-<link href="./part-levels.html" rel="prev">
+<link href="./whale-reactive-graph.html" rel="next">
+<link href="./whale-simple.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -97,7 +97,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><link rel="stylesheet" href="styles.css">
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script><link rel="stylesheet" href="styles.css">
 </head>
 <body class="nav-sidebar floating">
 
@@ -106,7 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intro.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-profiling.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">How fast is my app? Identifying bottlenecks</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -157,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./whale-intro.html" class="sidebar-item-text sidebar-link active">
+  <a href="./whale-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></span></a>
   </div>
 </li>
@@ -169,8 +194,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./whale-intermezzo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Profiling shiny apps</span></span></a>
+  <a href="./whale-profiling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">How fast is my app? Identifying bottlenecks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -205,6 +230,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Part 2: Reading and writing data FAST</span></span>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Part 3: cloud computing</span></span>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./summary.html" class="sidebar-item-text sidebar-link">
@@ -225,28 +258,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#a-tour-by-cran-whales" id="toc-a-tour-by-cran-whales" class="nav-link active" data-scroll-target="#a-tour-by-cran-whales"><span class="header-section-number">2.1</span> A tour by CRAN whales</a>
-  <ul class="collapse">
-<li><a href="#widgets" id="toc-widgets" class="nav-link" data-scroll-target="#widgets"><span class="header-section-number">2.1.1</span> Widgets</a></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">2.1.2</span> The data</a></li>
-  </ul>
-</li>
+<li><a href="#profiling-r-code" id="toc-profiling-r-code" class="nav-link active" data-scroll-target="#profiling-r-code"><span class="header-section-number">4.1</span> Profiling R code</a></li>
   <li>
-<a href="#the-app" id="toc-the-app" class="nav-link" data-scroll-target="#the-app"><span class="header-section-number">2.2</span> The app</a>
+<a href="#profiling-shiny-apps" id="toc-profiling-shiny-apps" class="nav-link" data-scroll-target="#profiling-shiny-apps"><span class="header-section-number">4.2</span> Profiling shiny apps</a>
   <ul class="collapse">
-<li><a href="#tab-1-all-traffic" id="toc-tab-1-all-traffic" class="nav-link" data-scroll-target="#tab-1-all-traffic"><span class="header-section-number">2.2.1</span> Tab 1: All traffic</a></li>
-  <li><a href="#tab-2-biggest-whales" id="toc-tab-2-biggest-whales" class="nav-link" data-scroll-target="#tab-2-biggest-whales"><span class="header-section-number">2.2.2</span> Tab 2: Biggest whales</a></li>
-  <li><a href="#tab-3-whales-by-hour" id="toc-tab-3-whales-by-hour" class="nav-link" data-scroll-target="#tab-3-whales-by-hour"><span class="header-section-number">2.2.3</span> Tab 3: Whales by hour</a></li>
-  <li><a href="#tab-4-detail-view" id="toc-tab-4-detail-view" class="nav-link" data-scroll-target="#tab-4-detail-view"><span class="header-section-number">2.2.4</span> Tab 4: Detail view</a></li>
+<li><a href="#profviz" id="toc-profviz" class="nav-link" data-scroll-target="#profviz"><span class="header-section-number">4.2.1</span> <code>profviz</code></a></li>
+  <li><a href="#shinyloadtest" id="toc-shinyloadtest" class="nav-link" data-scroll-target="#shinyloadtest"><span class="header-section-number">4.2.2</span> <code>shinyloadtest</code></a></li>
   </ul>
 </li>
   </ul></nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intro.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></a></li></ol></nav><div class="quarto-title">
+<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-profiling.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">How fast is my app? Identifying bottlenecks</span></a></li></ol></nav><div class="quarto-title">
 <h1 class="title">
-<span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span>
+<span class="chapter-number">4</span>&nbsp; <span class="chapter-title">How fast is my app? Identifying bottlenecks</span>
 </h1>
 </div>
 
@@ -261,68 +286,81 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   
 
 
-</header><p>This guide is a modern reading of the classic <code>promises</code> <a href="https://rstudio.github.io/promises/articles/promises_08_casestudy.html">Case study: converting a Shiny app to async</a> mixed with <code>shinyloadtest</code> <a href="https://rstudio.github.io/shinyloadtest/articles/case-study-scaling.html">Case study: Scaling an app</a>.</p>
-<p>Starting with an innocent shiny app, we will do many steps to make it more performant and analyze how many people can use it at the same time, <a href="https://rstudio.github.io/shinyloadtest/articles/analyzing-load-test-logs.html">creating reports</a> with <code>shinyloadtest</code> and <code>shinycannon</code>. The roadmap is the following:</p>
+</header><section id="profiling-r-code" class="level2" data-number="4.1"><h2 data-number="4.1" class="anchored" data-anchor-id="profiling-r-code">
+<span class="header-section-number">4.1</span> Profiling R code</h2>
 <ul>
-<li>App 1: the first version of the <a href="https://rstudio.github.io/promises/articles/promises_08_casestudy.html">cranwhales app</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We will modify some things to make it more modern (for example, use <code>bslib</code>).</li>
-<li>App 2: modify App 1 to introduce cache and memoise; use faster functions where possible.</li>
-<li>App 3: modify App 2 to introduce async via the <a href="https://rstudio.github.io/shiny/reference/ExtendedTask.html">new ExtendedTask</a>.</li>
-<li>App 4-R: modify App 3 to use an external <a href="https://www.rplumber.io/">plumber API</a>.</li>
-<li>App 4-Julia: modify App 3 to use an external API made in <a href="https://julialang.org/">Julia</a> with <a href="https://oxygenframework.github.io/Oxygen.jl/stable/">Oxygen.jl</a>. Julia is known for being a high-performance language, so let’s give it a try here.</li>
-<li>App 4-Python: modify App 3 to use an external API made in fastapi?</li>
+<li>bench::mark</li>
+</ul></section><section id="profiling-shiny-apps" class="level2" data-number="4.2"><h2 data-number="4.2" class="anchored" data-anchor-id="profiling-shiny-apps">
+<span class="header-section-number">4.2</span> Profiling shiny apps</h2>
+<p>There are two ways to measure the performance of this app:</p>
+<ul>
+<li><p>We can analyze the amount of time each function takes to execute and try to optimize them. This measures the experience of a single user. We will use ’profviz` for that.</p></li>
+<li><p>We can analyze the behavior of <span class="math inline">\(n\)</span> concurrent users in the app and see what functions/outputs/reactives are taking more time. Remember: since R is single-threaded, if 10 people are using the app and one session triggers a slow calculation, all sessions will have to wait for it to finish. We will use <code>shinyloadtest</code> for that.</p></li>
 </ul>
-<p>The repo is structured as a R package to make it easy to track dependencies, load functions and share them between the apps.</p>
-<section id="a-tour-by-cran-whales" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="a-tour-by-cran-whales">
-<span class="header-section-number">2.1</span> A tour by CRAN whales</h2>
-<p>You can see it <a href="https://gallery.shinyapps.io/cranwhales/">online</a> or follow me in this guided tour.</p>
-<p>The app intention is to show the <em>whales</em>: certain IPs that download <em>a lot</em> of data from CRAN. Let me describe its features.</p>
-<section id="widgets" class="level3" data-number="2.1.1"><h3 data-number="2.1.1" class="anchored" data-anchor-id="widgets">
-<span class="header-section-number">2.1.1</span> Widgets</h3>
-<p>The app has two widgets in a sidebar: - a date selector, stored in <code>input$date</code>: the day of the downloads. - a numeric input with the amount of <em>whales</em> (that is: the top N downloaders); stored in <code>input$n_whales</code>. It goes from 1 to 25.</p>
-<p>There is no button.</p>
-<p><img src="images/app-filter.png" class="img-fluid"></p>
-</section><section id="the-data" class="level3" data-number="2.1.2"><h3 data-number="2.1.2" class="anchored" data-anchor-id="the-data">
-<span class="header-section-number">2.1.2</span> The data</h3>
-<p>For each selected date, the app should download the zipped file from <a href="http://cran-logs.rstudio.com/">http://cran-logs.rstudio.com/</a> and read it.</p>
-<p>We will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server.</p>
-<p>Each zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:</p>
+<section id="profviz" class="level3" data-number="4.2.1"><h3 data-number="4.2.1" class="anchored" data-anchor-id="profviz">
+<span class="header-section-number">4.2.1</span> <code>profviz</code>
+</h3>
+<p>Following <a href="https://profvis.r-lib.org/articles/examples.html#example-3---profiling-a-shiny-application">this tutorial</a> from the <code>profviz</code> package, I recorded one session of the app being used. I just roamed around a bit, changing the inputs and seeing some graphs.</p>
+<p>Looking at the profviz result, we can think of some changes to make in the app:</p>
+<ul>
+<li>The function <code>calc_whales_by_hour</code> takes around 1/4 seconds to run; it is not bad, but with dozens of concurrent users this can be a problem.</li>
+</ul>
+<p>The code for this function is simple:</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># df = download_and_read()</span></span>
-<span><span class="co"># glimpse(df, n = 10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">calc_whales_by_hour</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">df_whales</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">whales_by_hour</span> <span class="op">&lt;-</span></span>
+<span>    <span class="va">df</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">inner_join</span><span class="op">(</span><span class="va">df_whales</span>, by <span class="op">=</span> <span class="st">"ip_id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">count</span><span class="op">(</span><span class="va">hour</span>, <span class="va">ip_name</span>, name <span class="op">=</span> <span class="st">"downloads"</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">whales_by_hour</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section></section><section id="the-app" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="the-app">
-<span class="header-section-number">2.2</span> The app</h2>
-<section id="tab-1-all-traffic" class="level3" data-number="2.2.1"><h3 data-number="2.2.1" class="anchored" data-anchor-id="tab-1-all-traffic">
-<span class="header-section-number">2.2.1</span> Tab 1: All traffic</h3>
-<p>This tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs.&nbsp;non-whales. You can see the impact of 6 users compared to the total ~58k users.</p>
-<p><img src="images/app-all_traffic.png" class="img-fluid"></p>
-<p>We need to calculate the top N whales<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs.&nbsp;non-whale.</p>
-</section><section id="tab-2-biggest-whales" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="tab-2-biggest-whales">
-<span class="header-section-number">2.2.2</span> Tab 2: Biggest whales</h3>
-<p>Here we compare the amount of downloads between the whales in a single day.</p>
-<p><img src="images/app-biggest-whales.png" class="img-fluid"></p>
-</section><section id="tab-3-whales-by-hour" class="level3" data-number="2.2.3"><h3 data-number="2.2.3" class="anchored" data-anchor-id="tab-3-whales-by-hour">
-<span class="header-section-number">2.2.3</span> Tab 3: Whales by hour</h3>
-<p>For each whale in a facet, count the downloads by hour.</p>
-<p><img src="images/app-whales-by-hour.png" class="img-fluid"></p>
-</section><section id="tab-4-detail-view" class="level3" data-number="2.2.4"><h3 data-number="2.2.4" class="anchored" data-anchor-id="tab-4-detail-view">
-<span class="header-section-number">2.2.4</span> Tab 4: Detail view</h3>
-<p>In the detail view, we can see which package was downloaded in a timeline by selecting a whale.</p>
+<p>but with 7 million rows this anti join can get a little slow. Every time you change the number of whales, this is recalculated. One solution is to calculate the counting just one time for every ip_id and already calculate the top 25 whales (which is the maximum number for the selectInput).</p>
+<ul>
+<li>Downloading the data takes a long time. Some files can have ~100MB. Reading them also takes time. We will cache these operations.</li>
+</ul></section><section id="shinyloadtest" class="level3" data-number="4.2.2"><h3 data-number="4.2.2" class="anchored" data-anchor-id="shinyloadtest">
+<span class="header-section-number">4.2.2</span> <code>shinyloadtest</code>
+</h3>
+<p>Following the <a href="https://rstudio.github.io/shinyloadtest/index.html"><code>shinyloadtest</code> docs</a>, we have to:</p>
+<ul>
+<li><p><a href="https://rstudio.github.io/shinyloadtest/articles/shinycannon.html">Install <code>shinycannon</code></a>: a tool in Java to simulate <span class="math inline">\(n\)</span> concurrent users. If you got any errors, take a look at your Java version.</p></li>
+<li><p>Run your app in a background job (to not block your R session).</p></li>
+</ul>
+<p>I created a directory called <code>jobs/</code> where I stored these scripts. For example, to run App 1 deleting all the files in <code>data_cache</code>, I wrote</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/load_all.html">load_all</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">run_app1</span><span class="op">(</span>delete_files <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then click to run as background job on RStudio.</p>
+<ul>
+<li>Run <code>record_session</code>: this will open a new tab where you can play around the app simulating a user; the output is a <em>recording</em> object.</li>
+</ul>
+<p>More precisely, I ran</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">shinyloadtest</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/shinyloadtest/reference/record_session.html">record_session</a></span><span class="op">(</span><span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html">glue</a></span><span class="op">(</span><span class="st">"http://127.0.0.1:8001"</span><span class="op">)</span>, output_file <span class="op">=</span> <span class="st">"app1"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Use the <code>shinycannon</code> command to run the recording with <span class="math inline">\(n\)</span> users. Here I chose <span class="math inline">\(n = 10\)</span> and a minimum duration of 4 minutes. The output is saved on <code>run_app1w10</code> (App 1, run with 10 workers).</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cmd code-with-copy"><code class="sourceCode dosbat"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>shinycannon app1 http:/<span class="at">/127</span>.0.0.1:8001 -<span class="at">-workers</span> 10 -<span class="at">-loaded-duration-minutes</span> 4 -<span class="at">-output-dir</span> run_app1w10 -<span class="at">-overwrite-output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can see <code>R/load_test.R</code> for some auxiliary functions.</p>
+<p>The complete report can be seen on <code>my_runs.html</code>, but here are some highlights:</p>
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="images/app-detail-view1.png" class="img-fluid figure-img"></p>
-<figcaption>A whale that downloaded many packages all the time</figcaption></figure>
+<figure class="figure"><p><img src="images/run_app1w10-1.png" class="img-fluid figure-img"></p>
+<figcaption>The time spent by each user session. In an app with no delays, all sessions should finish at a close time.</figcaption></figure>
 </div>
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="images/app-detail-view2.png" class="img-fluid figure-img"></p>
-<figcaption>A whale that downloaded one package at a time, in a organized manner</figcaption></figure>
+<figure class="figure"><p><img src="images/run_app1w10-2.png" class="img-fluid figure-img"></p>
+<figcaption>A detailed view of the time to load the home page per session. Notice that some users had to wait more than 30 seconds to load the home page.</figcaption></figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="images/run_app1w10-3.png" class="img-fluid figure-img"></p>
+<figcaption>Boxplot of time spent on each task.</figcaption></figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="images/run_app1w10-4.png" class="img-fluid figure-img"></p>
+<figcaption>There is even an interesting plot which correlates the amount of time spent by a process with the amount of concurrent users. We can see that the load page time increases with the amount of users.</figcaption></figure>
 </div>
 
 
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>see online version <a href="https://gallery.shinyapps.io/cranwhales/">here</a> or code <a href="https://github.com/rstudio/cranwhales">here</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>N = <code>input$n_whales</code><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -739,13 +777,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation column-body"><div class="nav-page nav-page-previous">
-      <a href="./part-levels.html" class="pagination-link" aria-label="Part 1: the many levels of optimization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Part 1: the many levels of optimization</span>
+      <a href="./whale-simple.html" class="pagination-link" aria-label="Version 1: a simple approach">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Version 1: a simple approach</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./whale-simple.html" class="pagination-link" aria-label="Version 1: a simple approach">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Version 1: a simple approach</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./whale-reactive-graph.html" class="pagination-link" aria-label="Avoid redundances: the reactive graph">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Avoid redundances: the reactive graph</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.7.13">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>2&nbsp; The CRAN whales app – Optimizing Shiny apps</title>
+
+
+<title>9&nbsp; Using other languages – Optimizing Shiny apps</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -17,41 +20,8 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
+
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
@@ -60,8 +30,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./whale-simple.html" rel="next">
-<link href="./part-levels.html" rel="prev">
+<link href="./part-data.html" rel="next">
+<link href="./whale-backend.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -71,7 +41,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-8d568fb58c33a0b3232b1f9968c626e4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ad3bc39150c09e3b1779ab6778d8ba3c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-ad3bc39150c09e3b1779ab6778d8ba3c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -97,25 +68,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><link rel="stylesheet" href="styles.css">
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intro.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-languages.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Using other languages</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
-  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Optimizing Shiny apps</a> 
         <div class="sidebar-tools-main">
@@ -134,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-<li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
@@ -154,10 +135,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
-<li class="sidebar-item">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./whale-intro.html" class="sidebar-item-text sidebar-link active">
+  <a href="./whale-intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></span></a>
   </div>
 </li>
@@ -199,12 +180,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./whale-languages.html" class="sidebar-item-text sidebar-link">
+  <a href="./whale-languages.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Using other languages</span></span></a>
   </div>
 </li>
       </ul>
-</li>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Part 2: Reading and writing data FAST</span></span>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Part 3: cloud computing</span></span>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./summary.html" class="sidebar-item-text sidebar-link">
@@ -218,41 +207,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
 </li>
     </ul>
-</div>
-</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99"><h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-<li>
-<a href="#a-tour-by-cran-whales" id="toc-a-tour-by-cran-whales" class="nav-link active" data-scroll-target="#a-tour-by-cran-whales"><span class="header-section-number">2.1</span> A tour by CRAN whales</a>
-  <ul class="collapse">
-<li><a href="#widgets" id="toc-widgets" class="nav-link" data-scroll-target="#widgets"><span class="header-section-number">2.1.1</span> Widgets</a></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">2.1.2</span> The data</a></li>
-  </ul>
-</li>
-  <li>
-<a href="#the-app" id="toc-the-app" class="nav-link" data-scroll-target="#the-app"><span class="header-section-number">2.2</span> The app</a>
-  <ul class="collapse">
-<li><a href="#tab-1-all-traffic" id="toc-tab-1-all-traffic" class="nav-link" data-scroll-target="#tab-1-all-traffic"><span class="header-section-number">2.2.1</span> Tab 1: All traffic</a></li>
-  <li><a href="#tab-2-biggest-whales" id="toc-tab-2-biggest-whales" class="nav-link" data-scroll-target="#tab-2-biggest-whales"><span class="header-section-number">2.2.2</span> Tab 2: Biggest whales</a></li>
-  <li><a href="#tab-3-whales-by-hour" id="toc-tab-3-whales-by-hour" class="nav-link" data-scroll-target="#tab-3-whales-by-hour"><span class="header-section-number">2.2.3</span> Tab 3: Whales by hour</a></li>
-  <li><a href="#tab-4-detail-view" id="toc-tab-4-detail-view" class="nav-link" data-scroll-target="#tab-4-detail-view"><span class="header-section-number">2.2.4</span> Tab 4: Detail view</a></li>
-  </ul>
-</li>
-  </ul></nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intro.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span></a></li></ol></nav><div class="quarto-title">
-<h1 class="title">
-<span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The CRAN whales app</span>
-</h1>
+<main class="content column-page-right" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-languages.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Using other languages</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Using other languages</span></h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-body">
+<div class="quarto-title-meta column-page-right">
 
     
   
@@ -261,68 +233,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   
 
 
-</header><p>This guide is a modern reading of the classic <code>promises</code> <a href="https://rstudio.github.io/promises/articles/promises_08_casestudy.html">Case study: converting a Shiny app to async</a> mixed with <code>shinyloadtest</code> <a href="https://rstudio.github.io/shinyloadtest/articles/case-study-scaling.html">Case study: Scaling an app</a>.</p>
-<p>Starting with an innocent shiny app, we will do many steps to make it more performant and analyze how many people can use it at the same time, <a href="https://rstudio.github.io/shinyloadtest/articles/analyzing-load-test-logs.html">creating reports</a> with <code>shinyloadtest</code> and <code>shinycannon</code>. The roadmap is the following:</p>
-<ul>
-<li>App 1: the first version of the <a href="https://rstudio.github.io/promises/articles/promises_08_casestudy.html">cranwhales app</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We will modify some things to make it more modern (for example, use <code>bslib</code>).</li>
-<li>App 2: modify App 1 to introduce cache and memoise; use faster functions where possible.</li>
-<li>App 3: modify App 2 to introduce async via the <a href="https://rstudio.github.io/shiny/reference/ExtendedTask.html">new ExtendedTask</a>.</li>
-<li>App 4-R: modify App 3 to use an external <a href="https://www.rplumber.io/">plumber API</a>.</li>
-<li>App 4-Julia: modify App 3 to use an external API made in <a href="https://julialang.org/">Julia</a> with <a href="https://oxygenframework.github.io/Oxygen.jl/stable/">Oxygen.jl</a>. Julia is known for being a high-performance language, so let’s give it a try here.</li>
-<li>App 4-Python: modify App 3 to use an external API made in fastapi?</li>
-</ul>
-<p>The repo is structured as a R package to make it easy to track dependencies, load functions and share them between the apps.</p>
-<section id="a-tour-by-cran-whales" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="a-tour-by-cran-whales">
-<span class="header-section-number">2.1</span> A tour by CRAN whales</h2>
-<p>You can see it <a href="https://gallery.shinyapps.io/cranwhales/">online</a> or follow me in this guided tour.</p>
-<p>The app intention is to show the <em>whales</em>: certain IPs that download <em>a lot</em> of data from CRAN. Let me describe its features.</p>
-<section id="widgets" class="level3" data-number="2.1.1"><h3 data-number="2.1.1" class="anchored" data-anchor-id="widgets">
-<span class="header-section-number">2.1.1</span> Widgets</h3>
-<p>The app has two widgets in a sidebar: - a date selector, stored in <code>input$date</code>: the day of the downloads. - a numeric input with the amount of <em>whales</em> (that is: the top N downloaders); stored in <code>input$n_whales</code>. It goes from 1 to 25.</p>
-<p>There is no button.</p>
-<p><img src="images/app-filter.png" class="img-fluid"></p>
-</section><section id="the-data" class="level3" data-number="2.1.2"><h3 data-number="2.1.2" class="anchored" data-anchor-id="the-data">
-<span class="header-section-number">2.1.2</span> The data</h3>
-<p>For each selected date, the app should download the zipped file from <a href="http://cran-logs.rstudio.com/">http://cran-logs.rstudio.com/</a> and read it.</p>
-<p>We will store the downloaded data to be read again for the next user, but will delete all data when the app starts globally (not per-user) mimicking the fresh start of a new server.</p>
-<p>Each zipped file has around ~90MB and stores a dataframe with ~7 million rows and 6 columns; it takes ~250MB of RAM after read. Here is a glimpse of the dataset:</p>
-<div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># df = download_and_read()</span></span>
-<span><span class="co"># glimpse(df, n = 10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section></section><section id="the-app" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="the-app">
-<span class="header-section-number">2.2</span> The app</h2>
-<section id="tab-1-all-traffic" class="level3" data-number="2.2.1"><h3 data-number="2.2.1" class="anchored" data-anchor-id="tab-1-all-traffic">
-<span class="header-section-number">2.2.1</span> Tab 1: All traffic</h3>
-<p>This tab show three value boxes and a chart with the amount of downloads per hour, colored by whales vs.&nbsp;non-whales. You can see the impact of 6 users compared to the total ~58k users.</p>
-<p><img src="images/app-all_traffic.png" class="img-fluid"></p>
-<p>We need to calculate the top N whales<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and store it in a variable; then we calculate the amount of downloads per id per hour and colour by whale vs.&nbsp;non-whale.</p>
-</section><section id="tab-2-biggest-whales" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="tab-2-biggest-whales">
-<span class="header-section-number">2.2.2</span> Tab 2: Biggest whales</h3>
-<p>Here we compare the amount of downloads between the whales in a single day.</p>
-<p><img src="images/app-biggest-whales.png" class="img-fluid"></p>
-</section><section id="tab-3-whales-by-hour" class="level3" data-number="2.2.3"><h3 data-number="2.2.3" class="anchored" data-anchor-id="tab-3-whales-by-hour">
-<span class="header-section-number">2.2.3</span> Tab 3: Whales by hour</h3>
-<p>For each whale in a facet, count the downloads by hour.</p>
-<p><img src="images/app-whales-by-hour.png" class="img-fluid"></p>
-</section><section id="tab-4-detail-view" class="level3" data-number="2.2.4"><h3 data-number="2.2.4" class="anchored" data-anchor-id="tab-4-detail-view">
-<span class="header-section-number">2.2.4</span> Tab 4: Detail view</h3>
-<p>In the detail view, we can see which package was downloaded in a timeline by selecting a whale.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="images/app-detail-view1.png" class="img-fluid figure-img"></p>
-<figcaption>A whale that downloaded many packages all the time</figcaption></figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="images/app-detail-view2.png" class="img-fluid figure-img"></p>
-<figcaption>A whale that downloaded one package at a time, in a organized manner</figcaption></figure>
-</div>
+</header>
 
 
-</section></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>see online version <a href="https://gallery.shinyapps.io/cranwhales/">here</a> or code <a href="https://github.com/rstudio/cranwhales">here</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>N = <code>input$n_whales</code><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -738,19 +656,22 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script><nav class="page-navigation column-body"><div class="nav-page nav-page-previous">
-      <a href="./part-levels.html" class="pagination-link" aria-label="Part 1: the many levels of optimization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Part 1: the many levels of optimization</span>
+</script>
+<nav class="page-navigation column-page-right">
+  <div class="nav-page nav-page-previous">
+      <a href="./whale-backend.html" class="pagination-link" aria-label="Running your backend on other machines">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Running your backend on other machines</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./whale-simple.html" class="pagination-link" aria-label="Version 1: a simple approach">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Version 1: a simple approach</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./part-data.html" class="pagination-link" aria-label="Part 2: Reading and writing data FAST">
+        <span class="nav-page-text">Part 2: Reading and writing data FAST</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer">
+<footer class="footer">
+  <div class="nav-footer">
     <div class="nav-footer-left">
 <p>Text here</p>
 </div>   
@@ -762,6 +683,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div>
   </div>
 </footer>
+
+
 
 
 </body></html>

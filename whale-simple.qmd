@@ -1,6 +1,5 @@
 ---
 title: "Version 1: a simple approach"
-subtitle: "A guide to serve a shiny app to the maximum amount of people ever imagined"
 ---
 
 ```{r, include=FALSE}

@@ -1,0 +1,6 @@
+---
+title: "Part 2: Reading and writing data FAST"
+---
+
+- Tabular formats: parquet, etc.
+- Databases: sqlite, duckdb, dbplyr, mongodb, etc.

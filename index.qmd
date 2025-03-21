@@ -4,6 +4,6 @@ This book is for those who made a nice shiny app and want to share it with the m
 
 > Given a fixed amount of hardware serving the shiny app (say, 2 cores) and a fixed amount of hardware serving an optional API backend (say, 4 cores), how many people can access a shiny app and have a good experience? Can we make it to a thousand?
 
-Creating a shiny app is easy, but serving it to dozens of people and making them all have a good experience... this is a challenge.
+Creating a shiny app is easy, but serving it to dozens of people and assuring that all have a good experience... that can be a little more complicated.
 
-In this book, we will show in practice how many techniques can be used to improve performance.
+In this book, we will show in practice how some techniques can be used to improve performance.

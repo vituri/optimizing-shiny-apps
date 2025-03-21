@@ -1,5 +1,5 @@
 ---
-title: "Version 2: avoid redundances and cache what you can"
+title: "Avoid redundances: the reactive graph"
 ---
 
 ```{r, include=FALSE}
@@ -8,8 +8,9 @@ eval_things <- FALSE
 
 We modified the server of App 1 as follows:
 
-```r
+```{r}
 #| code-fold: true
+#| eval: false
 
 server2 <- function(input, output, session) {
   # rc.data: read data ------------------------------------------------------

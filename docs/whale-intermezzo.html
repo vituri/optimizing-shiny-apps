@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.7.13">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>4&nbsp; Intermezzo: profiling whale v1 – Optimizing Shiny apps</title>
+<title>4&nbsp; Profiling shiny apps – Optimizing Shiny apps</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -131,7 +131,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./whale-intro.html">Part 1: many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intermezzo.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Intermezzo: profiling whale v1</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intermezzo.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Profiling shiny apps</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -173,8 +173,8 @@ window.Quarto = {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Part 1: many levels of optimization</span></a>
+            <a href="./part-levels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Part 1: the many levels of optimization</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -195,25 +195,25 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./whale-intermezzo.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Intermezzo: profiling whale v1</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Profiling shiny apps</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./whale-v2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Version 2: avoid redundances and cache what you can</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Avoid redundances and cache what you can: the reactive graph</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./whale-v3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Version 3: going async</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Async and parallel programming</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./whale-v4.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Version 4: exposing the backend</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Running your backend on other machines</span></span></a>
   </div>
 </li>
       </ul>
@@ -243,9 +243,9 @@ window.Quarto = {
   </ul></nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./whale-intro.html">Part 1: many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intermezzo.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Intermezzo: profiling whale v1</span></a></li></ol></nav><div class="quarto-title">
+<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part-levels.html">Part 1: the many levels of optimization</a></li><li class="breadcrumb-item"><a href="./whale-intermezzo.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Profiling shiny apps</span></a></li></ol></nav><div class="quarto-title">
 <h1 class="title">
-<span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Intermezzo: profiling whale v1</span>
+<span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Profiling shiny apps</span>
 </h1>
 </div>
 
@@ -750,8 +750,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./whale-v2.html" class="pagination-link" aria-label="Version 2: avoid redundances and cache what you can">
-        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Version 2: avoid redundances and cache what you can</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./whale-v2.html" class="pagination-link" aria-label="Avoid redundances and cache what you can: the reactive graph">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Avoid redundances and cache what you can: the reactive graph</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
